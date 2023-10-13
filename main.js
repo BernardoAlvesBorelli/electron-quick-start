@@ -1,19 +1,33 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require('electron')
-const path = require('node:path')
+const { app, BrowserWindow, ipcMain } = require('electron')
+const url = require('url')
+const path = require('path')
 
 function createWindow () {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    minWidth: 450,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true
+    },
+    minimizable: false,
+    maximizable: false,
+    icon: './icon.png'
   })
 
+  mainWindow.maximize();
+
   // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
+  mainWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'index.html'),
+    protocol: 'file:',
+    slashes: true
+  }))
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
@@ -41,3 +55,13 @@ app.on('window-all-closed', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+ipcMain.on("async-ipcmain", (event, args) => {
+  console.log("async-ipcmain", args)
+  event.sender.send("async-ipcrender", "oii ipcmain")
+})
+
+ipcMain.on("sync-ipcmain", (event, args) => {
+  console.log("sync-ipcmain", args)
+  event.returnValue = "oii ipcmain"
+})

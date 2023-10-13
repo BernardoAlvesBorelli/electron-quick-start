@@ -1,7 +1,12 @@
-/**
- * This file is loaded via the <script> tag in the index.html file and will
- * be executed in the renderer process for that window. No Node.js APIs are
- * available in this process because `nodeIntegration` is turned off and
- * `contextIsolation` is turned on. Use the contextBridge API in `preload.js`
- * to expose Node.js functionality from the main process.
- */
+const { ipcRenderer } = require('electron')
+
+let result = ipcRenderer.sendSync("sync-ipcmain", "Olá ipcrender")
+console.log(result)
+
+// ipc render - async
+
+ipcRenderer.on("async-ipcrender", (event, args) => {
+    console.log("ipcrender", args)
+})
+
+ipcRenderer.send("async-ipcmain", {msg: "Oiii"})
