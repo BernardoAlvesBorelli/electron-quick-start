@@ -1,12 +1,17 @@
 const { ipcRenderer } = require('electron')
 
-let result = ipcRenderer.sendSync("sync-ipcmain", "Olá ipcrender")
-console.log(result)
+document.querySelector("#dialog-1").onclick = () => {
+    ipcRenderer.send("dialog-1")
+}
 
-// ipc render - async
+document.querySelector("#dialog-2").onclick = () => {
+    ipcRenderer.send("dialog-2")
+}
 
-ipcRenderer.on("async-ipcrender", (event, args) => {
-    console.log("ipcrender", args)
-})
+document.querySelector("#dialog-3").onclick = () => {
+    ipcRenderer.send("dialog-3")
+}
 
-ipcRenderer.send("async-ipcmain", {msg: "Oiii"})
+document.querySelector("#dialog-4").onclick = () => {
+    ipcRenderer.send("dialog-4")
+}

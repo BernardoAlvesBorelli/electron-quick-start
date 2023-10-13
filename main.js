@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog, globalShortcut , Menu, MenuItem, Tray } = require('electron')
 const url = require('url')
 const path = require('path')
 
@@ -20,8 +20,6 @@ function createWindow () {
     icon: './icon.png'
   })
 
-  mainWindow.maximize();
-
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'index.html'),
@@ -31,7 +29,80 @@ function createWindow () {
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
+
+  globalShortcut.register('CmdOrCtrl+j', () => {
+    console.log(new Date().toISOString())
+  })
+  globalShortcut.register('Alt+j', () => {
+    dialog.showMessageBox({title: 'Teste', message: 'Teste de Mensagem'})
+  })
+
+  const tray = new Tray(icon)
+
+  let trayMenu = Menu.buildFromTemplate([
+    {
+      label: 'Settings',
+      click: () => {
+        dialog.showErrorBox("Error settings", "erro ao acessar settings")
+      }
+    },
+    {
+      label: 'Help',
+      click: () => {
+
+      }
+    },
+    {
+      label: 'Close',
+      click: () => {
+        app.quit()
+      }
+    }
+  ])
+
+  tray.setContextMenu(trayMenu)
+
 }
+
+const menu = Menu.buildFromTemplate([
+  {
+    label: "File",
+    sublabel: "sublabel"
+  },
+  {
+    label: "Edit",
+    submenu: [
+      {
+        label: 'Desfazer',
+        role: 'undo'
+      },
+      {
+        label: 'Refazer',
+        role: 'Redo'
+      },
+      {
+        label: 'Recarregar',
+        role: 'reload'
+      },
+      {
+        role: 'separator'
+      },
+      {
+        label: 'Recortar',
+        role: 'cut'
+      },
+      {
+        label: 'Copiar',
+        role: 'copy'
+      },
+      {
+        label: 'Colar',
+        role: 'paste'
+      }
+    ]
+  }
+])
+Menu.setApplicationMenu(menu)
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -56,12 +127,46 @@ app.on('window-all-closed', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-ipcMain.on("async-ipcmain", (event, args) => {
-  console.log("async-ipcmain", args)
-  event.sender.send("async-ipcrender", "oii ipcmain")
+ipcMain.on("dialog-1", (event, args) => {
+  dialog.showErrorBox("404", "File not found")
 })
 
-ipcMain.on("sync-ipcmain", (event, args) => {
-  console.log("sync-ipcmain", args)
-  event.returnValue = "oii ipcmain"
+ipcMain.on("dialog-2", (event, args) => {
+  dialog.showMessageBox({
+    title: "Titulo",
+    message: "Mensagem simples",
+    detail: "Detalhamento da mensagem",
+    buttons: ["OK", "Cancelar", "Teste 1"]
+  }, (response, checkboxChecked) => {
+    console.log(response);
+  })
+})
+
+ipcMain.on("dialog-3", (event, args) => {
+  dialog.showOpenDialog({
+    title: "Abrir Imagens",
+    buttonLabel: "Abrir Imagens",
+    message: "mensagem",
+    properties: ['openFile', 'multiSelections'],
+    filters: [
+      {
+        name: "Imagens",
+        extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif']
+      }
+    ]
+  }, (filePaths, bookmarks) => {
+    console.log(filePaths, bookmarks)
+  })
+})
+
+ipcMain.on("dialog-4", (event, args) => {
+  dialog.showSaveDialog({
+    title: "Salvando arquivo html",
+    message: "mensagem",
+    buttonLabel: "Salvar Arquivo",
+    nameFieldLabel: "Nome Arquivo",
+    filters: ['html', 'htm']
+  }, (filename, bookmarks) => {
+    console.log(filename)
+  });
 })
